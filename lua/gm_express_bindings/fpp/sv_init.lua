@@ -1,15 +1,16 @@
 local rawget = rawget
 local table_insert = table.insert
 
-local originalPlySendTouchData
-local originalRecalculateCanTouch
+ExpressBindings.FPP = ExpressBindings.FPP or {}
+local ExpressFPP = ExpressBindings.FPP
+
 local empty = {}
 local enabled = CreateConVar( "express_enable_fpp", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable FPP Bindings" )
 
 local function enable()
     if not FPP then return end
-    originalPlySendTouchData = originalPlySendTouchData or FPP.plySendTouchData
-    originalRecalculateCanTouch = originalRecalculateCanTouch or FPP.recalculateCanTouch
+    ExpressFPP.originalPlySendTouchData = ExpressFPP.originalPlySendTouchData or FPP.plySendTouchData
+    ExpressFPP.originalRecalculateCanTouch = ExpressFPP.originalRecalculateCanTouch or FPP.recalculateCanTouch
 
     local function writeEntData( ply, ent, tbl )
         local cppiOwner = ent:CPPIGetOwner()
@@ -32,7 +33,7 @@ local function enable()
             return
         end
 
-        return originalRecalculateCanTouch( plys, ents )
+        return ExpressFPP.originalRecalculateCanTouch( plys, ents )
     end
 
     FPP.plySendTouchData = function( ply, ents )
@@ -41,7 +42,7 @@ local function enable()
 
         -- If <300 ents, send this even if they're not ready for the Express message
         if entCount < 300 then
-            return originalPlySendTouchData( ply, ents )
+            return ExpressFPP.originalPlySendTouchData( ply, ents )
         end
 
         if not ply.Express_CanReceiveFPP then return end
@@ -62,22 +63,17 @@ local function enable()
 end
 
 local function disable()
-    FPP.plySendTouchData = originalPlySendTouchData
-    FPP.recalculateCanTouch = originalRecalculateCanTouch
+    FPP.plySendTouchData = ExpressFPP.originalPlySendTouchData
+    FPP.recalculateCanTouch = ExpressFPP.originalRecalculateCanTouch
     hook.Remove( "ExpressPlayerReceiver", "Express_FPPBindings" )
 end
 
-cvars.AddChangeCallback( "express_enable_fpp", function( _, old, new )
-    if new == 0 and old ~= 0 then
-        return disable()
-    end
-
-    if new ~= 0 then
-        return enable()
-    end
+cvars.AddChangeCallback( "express_enable_fpp", function( _, _, new )
+    if new == "0" then return disable() end
+    if new == "1" then return enable() end
 end, "setup_teardown" )
 
 
-hook.Add( "PostGamemodeLoaded", "Express_FPPBindings", function()
+ExpressBindings.waitForExpress( "Express_FPPBindings", function()
     if enabled:GetBool() then enable() end
 end )

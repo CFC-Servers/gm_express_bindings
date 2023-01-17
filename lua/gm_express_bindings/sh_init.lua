@@ -1,5 +1,15 @@
 AddCSLuaFile()
 
+ExpressBindings = {}
+function ExpressBindings.waitForExpress( name, cb )
+    hook.Add( "ExpressLoaded", name, function()
+        hook.Add( "Think", name, function()
+            hook.Remove( "Think", name )
+            cb()
+        end )
+    end )
+end
+
 -- TODO: Make a proper loader
 if SERVER then
     require( "playerload" )

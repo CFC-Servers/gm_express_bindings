@@ -1,10 +1,12 @@
-local ogSendToClient
+ExpressBindings.Adv2 = ExpressBindings.Adv2 or {}
+local ExpressAdv2 = ExpressBindings.Adv2
+
 local enabled = CreateConVar( "express_enable_adv2", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable AdvDupe2 Bindings" )
 
 local function enable()
     if not AdvDupe2 then return end
 
-    ogSendToClient = ogSendToClient or AdvDupe2.SendToClient
+    ExpressAdv2.ogSendToClient = ExpressAdv2.ogSendToClient or AdvDupe2.SendToClient
     function AdvDupe2.SendToClient( ply, data, autoSave )
         if not IsValid( ply ) then return end
         ply.AdvDupe2.Downloading = true
@@ -47,20 +49,15 @@ local function enable()
 end
 
 local function disable()
-    AdvDupe2.SendToClient = ogSendToClient
+    AdvDupe2.SendToClient = ExpressAdv2.ogSendToClient
     express.ClearReceiver( "advdupe2_receivefile" )
 end
 
-cvars.AddChangeCallback( "express_enable_adv2", function( _, old, new )
-    if new == 0 and old ~= 0 then
-        return disable()
-    end
-
-    if new ~= 0 then
-        return enable()
-    end
+cvars.AddChangeCallback( "express_enable_adv2", function( _, _, new )
+    if new == "0" then return disable() end
+    if new == "0" then return enable() end
 end, "setup_teardown" )
 
-hook.Add( "PostGamemodeLoaded", "Express_Adv2Bindings", function()
+ExpressBindings.waitForExpress( "Express_Adv2Bindings", function()
     if enabled:GetBool() then enable() end
 end )

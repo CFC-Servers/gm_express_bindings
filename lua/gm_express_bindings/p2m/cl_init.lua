@@ -22,10 +22,10 @@ local function disable()
 end
 
 cvars.AddChangeCallback( "express_enable_p2m", function( _, new )
-    if new == 0 then return disable() end
-    if new ~= 0 then return enable() end
+    if new == "0" then return disable() end
+    if new == "1" then return enable() end
 end, "setup_teardown" )
 
-hook.Add( "PostGamemodeLoaded", "Express_P2MBindings", function()
+ExpressBindings.waitForExpress( "Express_P2MBindings", function()
     if enabled:GetBool() then enable() end
 end )

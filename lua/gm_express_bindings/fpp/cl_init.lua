@@ -32,18 +32,12 @@ local function disable()
     express.ClearReceiver( "fpp_touchability_data" )
 end
 
-cvars.AddChangeCallback( "express_enable_fpp", function( _, old, new )
-    if new == 0 and old ~= 0 then
-
-        return disable()
-    end
-
-    if new ~= 0 then
-        return enable()
-    end
+cvars.AddChangeCallback( "express_enable_fpp", function( _, _, new )
+    if new == "0" then return disable() end
+    if new == "1" then return enable() end
 end, "setup_teardown" )
 
-hook.Add( "PostGamemodeLoaded", "Express_FPPBindings", function()
+ExpressBindings.waitForExpress( "Express_FPPBindings", function()
     if enabled:GetBool() then enable() end
 end )
 

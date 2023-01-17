@@ -1,9 +1,10 @@
-local originalReceiver
-local originalUploadFile
+ExpressBindings.Adv2 = ExpressBindings.Adv2 or {}
+local ExpressAdv2 = ExpressBindings.Adv2
+
 local enabled = CreateConVar( "express_enable_adv2", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "Enable AdvDupe2 Bindings" )
 
 local function envOn( data )
-    setfenv( originalReceiver, {
+    setfenv( ExpressAdv2.originalReceiver, {
         net = {
             ReadUInt = function()
                 return data.autoSave
@@ -22,21 +23,21 @@ local function envOn( data )
 end
 
 local function envOff()
-    setfenv( originalReceiver, getfenv( 0 ) )
+    setfenv( ExpressAdv2.originalReceiver, getfenv( 0 ) )
 end
 
 local function enable()
     if not AdvDupe2 then return end
 
-    originalReceiver = originalReceiver or net.Receivers["advdupe2_receivefile"]
+    ExpressAdv2.originalReceiver = ExpressAdv2.originalReceiver or net.Receivers["advdupe2_receivefile"]
 
     express.Receive( "advdupe2_receivefile", function( data )
         envOn( data )
-        originalReceiver()
+        ExpressAdv2.originalReceiver()
         envOff()
     end )
 
-    originalUploadFile = originalUploadFile or AdvDupe2.UploadFile
+    ExpressAdv2.originalUploadFile = ExpressAdv2.originalUploadFile or AdvDupe2.UploadFile
     AdvDupe2.UploadFile = function( ... )
         local name
         local stub = function() end
@@ -60,7 +61,7 @@ local function enable()
             }, cb )
         end
 
-        local ok, err = pcall( originalUploadFile, ... )
+        local ok, err = pcall( ExpressAdv2.originalUploadFile, ... )
         if not ok then
             print( "Error uploading file:", err )
         end
@@ -74,21 +75,16 @@ end
 
 local function disable()
     envOff()
-    AdvDupe2.UploadFile = originalUploadFile
+    AdvDupe2.UploadFile = ExpressAdv2.originalUploadFile
     express.ClearReceiver( "advdupe2_receivefile" )
 end
 
-cvars.AddChangeCallback( "express_enable_adv2", function( _, old, new )
-    if new == 0 and old ~= 0 then
-        return disable()
-    end
-
-    if new ~= 0 then
-        return enable()
-    end
+cvars.AddChangeCallback( "express_enable_adv2", function( _, _, new )
+    if new == "0" then return disable() end
+    if new == "1" then return enable() end
 end, "setup_teardown" )
 
-hook.Add( "PostGamemodeLoaded", "Express_Adv2Bindings", function()
+ExpressBindings.waitForExpress( "Express_Adv2Bindings", function()
     if enabled:GetBool() then enable() end
 end )
 
