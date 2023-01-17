@@ -8,7 +8,6 @@ local function enable()
     local entTouchReasons = FPP.entTouchReasons
 
     express.Receive( "fpp_touchability_data", function( data )
-
         local dataCount = #data
 
         for i = 1, dataCount, 4 do
@@ -27,10 +26,6 @@ local function enable()
             end
         end
     end )
-
-    express.ReceivePreDl( "fpp_touchability_data", function( _, _, size )
-        print( "fpp_touchability_data", size )
-    end )
 end
 
 local function disable()
@@ -39,6 +34,7 @@ end
 
 cvars.AddChangeCallback( "express_enable_fpp", function( _, old, new )
     if new == 0 and old ~= 0 then
+
         return disable()
     end
 
