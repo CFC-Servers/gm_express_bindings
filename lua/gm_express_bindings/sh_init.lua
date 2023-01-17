@@ -18,7 +18,7 @@ hook.Add( "ExpressLoaded", "ExpressBindings_Loader", function()
         hook.Remove( "Think", "ExpressBindings_Loader" )
 
         for name, cb in pairs( ExpressBindings.waiting ) do
-            local success, err = xpcall( cb )
+            local success, err = pcall( cb )
             if not success then
                 ErrorNoHalt( "ExpressBindings Loader (" .. name .. ") : " .. err )
             end
