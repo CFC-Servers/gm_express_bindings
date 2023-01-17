@@ -1,14 +1,30 @@
 AddCSLuaFile()
 
+local loaded = false
 ExpressBindings = {}
+ExpressBindings.waiting = {}
+
 function ExpressBindings.waitForExpress( name, cb )
-    hook.Add( "ExpressLoaded", name, function()
-        hook.Add( "Think", name, function()
-            hook.Remove( "Think", name )
-            cb()
-        end )
-    end )
+    if loaded then
+        ErrorNoHalt( "ExpressBindings.waitForExpress called after Express was loaded!" )
+        return cb()
+    end
+
+    ExpressBindings.waiting[name] = cb
 end
+
+hook.Add( "ExpressLoaded", "ExpressBindings_Loader", function()
+    hook.Add( "Think", "ExpressBindings_Loader", function()
+        hook.Remove( "Think", "ExpressBindings_Loader" )
+
+        for name, cb in pairs( ExpressBindings.waiting ) do
+            local success, err = xpcall( cb )
+            if not success then
+                ErrorNoHalt( "ExpressBindings Loader (" .. name .. ") : " .. err )
+            end
+        end
+    end )
+end )
 
 -- TODO: Make a proper loader
 if SERVER then
