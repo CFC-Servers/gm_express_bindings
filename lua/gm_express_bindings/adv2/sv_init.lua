@@ -48,8 +48,7 @@ end
 
 local function disable()
     AdvDupe2.SendToClient = ogSendToClient
-
-    express.Receive( "advdupe2_receivefile", nil )
+    express.ClearReceiver( "advdupe2_receivefile" )
 end
 
 cvars.AddChangeCallback( "express_enable_adv2", function( _, old, new )

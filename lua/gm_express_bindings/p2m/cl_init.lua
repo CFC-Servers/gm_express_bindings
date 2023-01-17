@@ -16,7 +16,7 @@ end
 
 local function disable()
     if not prop2mesh then return end
-    express.Receive( "prop2mesh_download", nil )
+    express.ClearReceiver( "prop2mesh_download" )
 end
 
 cvars.AddChangeCallback( "express_enable_p2m", function( _, new )

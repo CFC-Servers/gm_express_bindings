@@ -75,7 +75,7 @@ end
 local function disable()
     envOff()
     AdvDupe2.UploadFile = originalUploadFile
-    express.Receive( "advdupe2_receivefile", nil )
+    express.ClearReceiver( "advdupe2_receivefile" )
 end
 
 cvars.AddChangeCallback( "express_enable_adv2", function( _, old, new )
