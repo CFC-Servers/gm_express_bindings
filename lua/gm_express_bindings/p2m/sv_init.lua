@@ -26,6 +26,8 @@ local function enable()
                     local partLists = ent.prop2mesh_partlists
                     if partLists then
                         table.insert( downloadObjects, { crc = crc, partData = partLists[crc] } )
+                    else
+                        ErrorNoHalt( "Prop2Mesh: Tried to send download for invalid partlist on entity " .. tostring( ent ), ent:CPPIGetOwner() )
                     end
                 end
             end
