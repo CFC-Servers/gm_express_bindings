@@ -9,7 +9,9 @@ local function enable()
         for _, obj in ipairs( objects ) do
             local crc = obj.crc
             local partData = obj.partData
-            prop2mesh.handleDownload( crc, partData )
+            if partData then
+                prop2mesh.handleDownload( crc, partData )
+            end
         end
     end )
 end

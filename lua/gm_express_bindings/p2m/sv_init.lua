@@ -20,9 +20,12 @@ local function enable()
 
             for _, download in ipairs( downloads ) do
                 local ent, crc = unpack( download )
-                local partlists = ent.prop2mesh_partlists
-                if partlists then
-                    table.insert( downloadObjects, { crc = crc, partData = partlists[crc] } )
+
+                if IsValid( ent ) then
+                    local partLists = ent.prop2mesh_partlists
+                    if partLists then
+                        table.insert( downloadObjects, { crc = crc, partData = partLists[crc] } )
+                    end
                 end
             end
 
