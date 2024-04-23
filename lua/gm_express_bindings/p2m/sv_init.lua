@@ -16,22 +16,19 @@ return function( Module )
                 local downloadObjects = {}
 
                 for _, download in ipairs( downloads ) do
-                    local ent, crc = unpack( download )
+                    local ent, crc = download[1], download[2]
 
                     if IsValid( ent ) then
                         local partLists = ent.prop2mesh_partlists
+
                         if partLists then
                             table.insert( downloadObjects, { crc = crc, partData = partLists[crc] } )
-                        else
-                            ErrorNoHalt( "Prop2Mesh: Tried to send download for invalid partlist on entity " .. tostring( ent ), ent:CPPIGetOwner() )
                         end
                     end
                 end
 
                 if #downloadObjects > 0 then
                     express.Send( "prop2mesh_download", downloadObjects, ply )
-                else
-                    print( "ExpressBindings: Tried to send empty download list to " .. tostring( ply ), "(skipping)" )
                 end
             end
 
