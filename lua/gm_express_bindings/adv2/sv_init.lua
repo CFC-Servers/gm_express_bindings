@@ -13,7 +13,6 @@ return function( Module )
                 data = data
             }
 
-            print( SysTime(), "Running SendToClient, sending advdupe2_receivefile" )
             express.Send( "advdupe2_receivefile", sendData, ply, function( cbPly )
                 cbPly.AdvDupe2.Downloading = false
                 AdvDupe2.RemoveProgressBar( ply )
