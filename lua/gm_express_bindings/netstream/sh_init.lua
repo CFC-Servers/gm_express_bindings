@@ -1,3 +1,6 @@
+-- Experimental, mileage may vary
+-- It seemed to work in my testing (with downloading the SF docs, and using SF read/write stream methods).
+-- No clue how well disabling/re-enabling the module works though
 AddCSLuaFile()
 
 local HOOKNAME = "Express_NetstreamBindings"
