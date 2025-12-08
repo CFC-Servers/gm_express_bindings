@@ -4,6 +4,11 @@ return function( Module )
     function Module.Enable()
         Module.ogSendToClient = Module.ogSendToClient or AdvDupe2.SendToClient
         function AdvDupe2.SendToClient( ply, data, autoSave )
+            if net.Stream.SendSize > #data then
+                Module.ogSendToClient( ply, data, autoSave )
+                return
+            end
+
             if not IsValid( ply ) then return end
             if #data > AdvDupe2.MaxDupeSize then
                 AdvDupe2.Notify( ply, "Copied duplicator filesize is too big!", NOTIFY_ERROR )
@@ -18,37 +23,29 @@ return function( Module )
                 data = data
             }
 
-            express.Send( "advdupe2_receivefile", sendData, ply, function( cbPly )
+            express.Send( "AdvDupe2.ReceiveFile", sendData, ply, function( cbPly )
                 cbPly.AdvDupe2.Downloading = false
             end )
         end
 
-        express.Receive( "advdupe2_receivefile", function( ply, data )
+        express.Receive( "AdvDupe2.SendFile", function( ply, data )
             if not IsValid( ply ) then return end
+            if not ply.AdvDupe2 then ply.AdvDupe2 = {} end
+
             ply.AdvDupe2.Uploading = true
-            AdvDupe2.InitProgressBar( ply, "Opening: " )
+            AdvDupe2.InitProgressBar( ply, "Uploading: " )
 
             local name = data.name
             local fileData = data.data
 
-            if not ply.AdvDupe2 then ply.AdvDupe2 = {} end
-
-            local _1, _2, _3 = string.find( name, "([%w_]+)" )
-            if _3 then
-                ply.AdvDupe2.Name = string.sub( _3, 1, 32 )
-            else
-                ply.AdvDupe2.Name = "Advanced Duplication"
-            end
-
+            ply.AdvDupe2.Name = string.match( name, "([%w_ ]+)" ) or "Advanced Duplication"
             AdvDupe2.LoadDupe( ply, AdvDupe2.Decode( fileData ) )
-
             ply.AdvDupe2.Uploading = false
-            AdvDupe2.RemoveProgressBar( ply )
         end )
     end
 
     function Module.Disable()
         AdvDupe2.SendToClient = Module.ogSendToClient
-        express.ClearReceiver( "advdupe2_receivefile" )
+        express.ClearReceiver( "AdvDupe2.SendFile" )
     end
 end
